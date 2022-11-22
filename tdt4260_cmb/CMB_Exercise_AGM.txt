@@ -1,0 +1,112 @@
+ACTUAL WORK!
+image_processing_c.c /OPENMP
+## Running perf on VM before modifying blurIteration function. Indicates that "void  blurIteration" function appears to be the taking the most time to execute @ 99.05% runtime appx: 52.81 s
+
+##TEST 1
+## After adding Pragma line code in the void blurIteration function, RUNTIME IS 55.5s on VM with excution of 98.94%(self)
+on CMB below metrics observed
+Runtime: 29.81 s
+Energy:  151.10 J
+EDP:     4504.35 Js
+
+##TEST 2
+## After adding Pragma line code in the void blurIteration function to the inner outerloop (SenterY) metrics detiorated on CMB but somehow improved on VM with respect to execution i.e , RUNTIME IS 55.5s on VM with excution of 94.77%(self)
+on CMB below metrics observed
+Runtime: 32.78 s
+Energy:  158.35 J
+EDP:     5190.58 Js
+
+##TEST 3
+## After removing Pragma line code in the void blurIteration function to the inner outerloop (SenterY) and editing the calculate difference and image saving routinesmetrics further detiorated on CMB and VM.i.e , RUNTIME IS 57.27s on VM with excution of 99.10%(self)
+on CMB below metrics observed
+Runtime: 30.57 s
+Energy:  155.36 J
+EDP:     4749.49 Js
+
+##Adding pragma to 'internals'i.e just before the for loops for x and y in the void blurIteration function increased the runtime to about 210s with excution of 22.17%(self) for the blurIteration symbol. Did not check on CMB.
+
+##TEST 4
+##Removing from the 'internals'i.e just before the for loops for x and y in the void blurIteration function and swapping the varaibles in the loops (loop intercahnge) there is some significant improvemnts. i.e RUNTIME is 36.77s on VM with execution of 98.57%(self)
+on CMB below metrics observed
+Runtime: 24.35 s
+Energy:  121.96 J
+EDP:     2969.75 Js
+
+##TEST 5
+##Swapping the varaibles of the x and y for loops (loop intercahnge) and putting x computations in x loop and y computations in y loop there is some slight improvemnts. i.e RUNTIME is 33.37s on VM with execution of 98.28%(self)
+on CMB below metrics observed
+Runtime: 23.60 s (slight improvement)
+Energy:  122.13 J (a little decline in performance)
+EDP:     2882.16 Js (slight improvement)
+
+
+##Adding pragma with '16 cores' just before the two outer loops in the void blurIteration function runtime of 33.12. Did not check on CMB.
+
+##TEST 6
+##each colour was calculated individually.Took out for loops from 'children'.runtime of 11.44. 
+on CMB below metrics observed
+Runtime: 12.19 s
+Energy:  52.24 J
+EDP:     636.84 Js
+
+##TEST 7
+##changed pragmathing to auto removed second pragma in the void blurIteration function runtime of 9.83. 
+Runtime: 14.48 s
+Energy:  54.72 J
+EDP:     792.33 Js
+
+##TEST 8
+##pragmathing to auto 2x for both outer loops in the void blurIteration function runtime of 9.32. 
+Runtime: 14.07 s
+Energy:  58.37 J
+EDP:     831.31 Js
+
+##each colour was calculated individually??????in the void blurIteration function runtime of 11.44s. Run this several times gives different results... Garbage collection other factors could be a reason for varying results from etrics on CMB.
+
+
+image_processing_opencl.cl /OPENCL
+
+##.CL TEST 1
+Before loop interchange : total elapsed time on VM= 20.12 s
+After loop interchange : total elapsed time on VM= 19.75 s
+
+Loop interchange + reordering of variables/ arguments (positions of code lines changed) to be in loops with same variables : total elapsed time on VM= 15.75 s
+There are pixel errors when this is run.
+
+OpenCl version now run on CMB with the following metrics(results):
+Runtime: 9.33
+Energy: 27.845
+EDP: 259.794
+
+##.CL TEST 2
+Loop interchange + reordering of variables/ arguments (positions of code lines changed) to be in loops with same variables +  #pragma omp parallel for schedule(dynamic,4) : total elapsed time on VM= 15.80 s
+There are pixel errors when this is run.
+
+OpenCl version now run on CMB with the following metrics(results):
+Runtime: 9.33
+Energy: 27.89
+EDP: 260.21
+
+##.CL TEST 3
+Loop interchange + reordering of variables/ arguments (positions of code lines changed) to be in loops with same variables +  #pragma omp parallel for schedule(auto) : total elapsed time on VM= 15.90 s
+There are pixel errors when this is run.
+#pragma omp parallel for schedule(auto) SEEMS NOT TO DO MUCH.
+
+OpenCl version now run on CMB with the following metrics(results):
+Runtime: 9.32
+Energy: 28.64
+EDP: 266.91
+
+##.CL TEST 4
+Loop interchange + reordering of variables/ arguments (positions of code lines changed) to be in loops with same variables +  #pragma omp parallel for schedule(dynamic,16) : total elapsed time on VM= 15.80 s
+There are pixel errors when this is run.
+#pragma omp parallel for schedule(dynamic,16).
+
+OpenCl version now run on CMB with the following metrics(results):
+Runtime: 9.32
+Energy: 27.39
+EDP: 255.25
+
+No significant improvement with Energy/ EDP observed with test four. Amdahl's law at work here!
+
+With OpenCL, there is a significant improvement in all metrics due to the GPU resources available and it being specific for GPUs.
